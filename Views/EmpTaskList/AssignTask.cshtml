@@ -1,0 +1,27 @@
+﻿@model authApp.Models.AssignTaskViewModel
+
+<h2>Assign Task</h2>
+
+@if (ViewBag.SuccessMessage != null)
+{
+    <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+}
+
+<form asp-action="AssignTask" method="post">
+    <div>
+        <label>Task Name:</label>
+        <input asp-for="EmployeeTask.TaskName" />
+        <span asp-validation-for="EmployeeTask.TaskName"></span>
+    </div>
+    <div>
+        <label>Description:</label>
+        <textarea asp-for="EmployeeTask.Description"></textarea>
+        <span asp-validation-for="EmployeeTask.Description"></span>
+    </div>
+    <div>
+        <label>Assign to:</label>
+        <select asp-for="EmployeeTask.AssignedToUserId" asp-items="@(new SelectList(Model.Employees, "UserId", "Username"))"></select>
+        <span asp-validation-for="EmployeeTask.AssignedToUserId"></span>
+    </div>
+    <button type="submit">Assign Task</button>
+</form>

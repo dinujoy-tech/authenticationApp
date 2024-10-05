@@ -1,0 +1,26 @@
+﻿@model authApp.Models.User
+
+<h2>Manager Signup</h2>
+<form asp-action="ManagerSignup" method="post">
+    <div>
+        <label asp-for="UserId"></label>
+        <input asp-for="UserId" />
+        <span asp-validation-for="UserId"></span>
+    </div>
+    <div>
+        <label asp-for="Username"></label>
+        <input asp-for="Username" />
+        <span asp-validation-for="Username"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div>
+        <label asp-for="Role"></label>
+        <input asp-for="Role" />
+        <span asp-validation-for="Role"></span>
+    </div>
+    <button type="submit">Sign Up</button>
+</form>
