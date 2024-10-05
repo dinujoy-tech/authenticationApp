@@ -1,13 +1,11 @@
-﻿@model IEnumerable<authApp.Models.EmployeeTask>
+﻿@model List<authApp.Models.EmployeeTask>
 
-<h2>Your Assigned Tasks</h2>
+<h2>Your Tasks</h2>
 
 <table>
     <thead>
         <tr>
-            <th>Task Name</th>
-            <th>Description</th>
-            <th>Due Date</th>
+            <th>Task Description</th>
             <th>Status</th>
         </tr>
     </thead>
@@ -15,9 +13,7 @@
         @foreach (var task in Model)
         {
             <tr>
-                <td>@task.TaskName</td>
                 <td>@task.Description</td>
-                <td>@task.DueDate.ToString("d")</td>
                 
             </tr>
         }

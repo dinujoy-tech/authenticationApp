@@ -32,8 +32,10 @@ namespace authApp.Controllers
 
                 if (existingUser != null)
                 {
-                    // Log the user ID being set in session
                     HttpContext.Session.SetString("UserId", existingUser.UserId.ToString());
+
+                    // Retrieve the user's role
+                    HttpContext.Session.SetString("Role", existingUser.Role);
                     return RedirectToAction("Welcome", "Account");
                 }
 
@@ -53,12 +55,34 @@ namespace authApp.Controllers
 
         public IActionResult Welcome()
         {
-            // Get the current user ID from session
-            var userId = HttpContext.Session.GetString("UserId");
+            // Fetch the current user from the session
+            var userIdString = HttpContext.Session.GetString("UserId");
 
-            // Pass the user ID to the view using ViewBag
-            ViewBag.UserId = userId;
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                // If the session doesn't contain a UserId, redirect to the login page
+                return RedirectToAction("Login");
+            }
 
+            // Convert the session-stored UserId (string) to an integer
+            int userId = int.Parse(userIdString);
+
+            // Find the user in the database
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                // If the user is not found, redirect to the login page
+                return RedirectToAction("Login");
+            }
+
+            // Pass the user details to the view
+            return View(user);  // Assuming your view will use the User model or a view model with role information
+        }
+
+
+        public IActionResult AccessDenied()
+        {
             return View();
         }
 

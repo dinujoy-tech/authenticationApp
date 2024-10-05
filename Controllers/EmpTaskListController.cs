@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using authApp.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace authApp.Controllers
 {
@@ -13,63 +14,64 @@ namespace authApp.Controllers
             _context = context;
         }
 
-        // GET: Assign Task view (only accessible by managers)
+        // GET: Assign Task to Employees (Only Manager role can access)
         [HttpGet]
         public async Task<IActionResult> AssignTask()
         {
-            // Ensure that the user is a manager
-            if (User.IsInRole("Manager"))
+            // Retrieve the user role from session
+            var userRole = HttpContext.Session.GetString("Role");
+
+            // Check if the role is "Manager"
+            if (userRole == "Manager")
             {
                 var model = new AssignTaskViewModel
                 {
-                    EmployeeTask = new EmployeeTask(), // Initialize EmployeeTask
-                    Employees = await _context.Users.Where(u => u.Role == "Employee").ToListAsync() // Get list of employees
+                    EmployeeTask = new EmployeeTask(),
+                    Employees = await _context.Users.Where(u => u.Role == "Employee").ToListAsync()
                 };
                 return View(model);
             }
-            return RedirectToAction("AccessDenied", "Home"); // Redirect if not authorized
+
+            // Redirect if not authorized
+            return RedirectToAction("AccessDenied", "Account");
         }
 
-        // POST: Assign task
+        // Handle POST request for assigning tasks
         [HttpPost]
         public async Task<IActionResult> AssignTask(AssignTaskViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Save the task to the database
+                // Add the EmployeeTask to the EmployeeTasks table
                 _context.EmployeeTasks.Add(model.EmployeeTask);
+
+                // Save changes to the database
                 await _context.SaveChangesAsync();
 
-                // Optionally, you could add a success message here
-                ViewBag.SuccessMessage = "Task assigned successfully.";
-            }
-            else
-            {
-                // Re-populate the employees list if the model state is invalid
-                model.Employees = await _context.Users
-                    .Where(u => u.Role == "Employee")
-                    .ToListAsync();
+                // Redirect to a page to view tasks, or display a success message
+                //return RedirectToAction("EmployeeTasks");
             }
 
-            // Stay on the assignment page regardless of model state
+            // Reload the list of employees in case of an error
+            model.Employees = await _context.Users.Where(u => u.Role == "Employee").ToListAsync();
             return View(model);
         }
 
-
-        // GET: View assigned tasks for employees
         [HttpGet]
         public async Task<IActionResult> EmployeeTasks()
         {
-            // Get the current user ID from session
-            var userId = HttpContext.Session.GetString("UserId");
-            // Fetch tasks assigned to the employee
-            var tasks = await _context.EmployeeTasks
-                .Where(t => t.AssignedToUserId == userId) // Filter by the employee's user ID
-                .ToListAsync();
+            var userIdString = HttpContext.Session.GetString("UserId");
 
-            return View(tasks);
+            // Ensure userIdString is not null
+            if (userIdString != null)
+            {
+                var tasks = await _context.EmployeeTasks
+                    .Where(t => t.AssignedToUserId == userIdString) // Ensure correct userId is checked
+                    .ToListAsync();
+                return View(tasks);
+            }
+
+            return RedirectToAction("AccessDenied", "Account"); // Redirect if session is missing or unauthorized
         }
-
-        // Other actions...
     }
 }

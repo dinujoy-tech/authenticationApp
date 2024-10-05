@@ -1,7 +1,15 @@
-﻿@{
-    ViewData["Title"] = "Welcome";
+﻿@model authApp.Models.User
+
+<h2>Welcome, @Model.Username!</h2>
+
+<p>You are logged in as @Model.Role</p>
+
+@if (Model.Role == "Manager")
+{
+    <a href="@Url.Action("AssignTask", "EmpTaskList")" class="btn btn-primary">Assign Tasks</a>
+
 }
-
-<h2>Welcome!</h2>
-
-<p>Your User ID: @ViewBag.UserId</p> <!-- Display the User ID -->
+else if (Model.Role == "Employee")
+{
+    <a href="@Url.Action("EmployeeTasks", "EmpTaskList")" class="btn btn-primary">View Tasks</a>
+}
