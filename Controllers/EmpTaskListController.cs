@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using authApp.Models;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace authApp.Controllers
 {
@@ -23,6 +24,7 @@ namespace authApp.Controllers
         }
 
         [HttpPost]
+        
         public IActionResult AssignTask(EmployeeTask task)
         {
             if (ModelState.IsValid)
@@ -30,22 +32,51 @@ namespace authApp.Controllers
                 // Ensure the DueDate is in UTC
                 task.DueDate = DateTime.SpecifyKind(task.DueDate, DateTimeKind.Utc);
 
+                // Add the task to the database
                 _context.EmployeeTasks.Add(task);
                 _context.SaveChanges();
-                return RedirectToAction("TaskList");
+
+                // Clear the form by returning a new instance of EmployeeTask
+                ModelState.Clear(); // This clears the form state, ensuring no old data is shown
+
+                // Repopulate the employee list to show it in the dropdown
+                var employeeList = _context.Users.Where(u => u.Role == "Employee").ToList();
+                ViewBag.Employees = employeeList;
+
+                return View(new EmployeeTask()); // Return a new instance of EmployeeTask
             }
-            return View(task);
+
+            // If validation failed, repopulate the employee list
+            var employeeListOnError = _context.Users.Where(u => u.Role == "Employee").ToList();
+            ViewBag.Employees = employeeListOnError;
+
+            return View(task); // Return the form with validation errors and filled data
         }
+
+
+
+
 
 
         // GET: View employee tasks (only for employees)
         public IActionResult TaskList()
         {
-            var currentUser = User.Identity.Name; // Assuming the username is stored in the session
+            // Retrieve the current user's UserId from the session
+            var currentUserId = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return RedirectToAction("Login", "Account"); // Redirect to login if the session has expired or the user is not logged in
+            }
+
+            // Query the tasks assigned to the current user
             var tasks = _context.EmployeeTasks
-                .Where(t => t.AssignedToUserId == currentUser)
+                .Where(t => t.AssignedToUserId == currentUserId)
                 .ToList();
+
+            // Pass the list of tasks to the view
             return View(tasks);
         }
+
     }
 }
