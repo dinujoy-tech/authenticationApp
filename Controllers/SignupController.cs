@@ -50,6 +50,7 @@
 using authApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
+
 public class SignupController : Controller
 {
     private readonly AppDbContext _context;

@@ -1,35 +1,34 @@
-﻿@model authApp.Models.AssignTaskViewModel
-
-<h2>Assign Task</h2>
+﻿@model authApp.Models.EmployeeTask
+@{
+    ViewBag.Title = "Assign Task";
+}
+<h2>Assign Task to Employee</h2>
 
 <form asp-action="AssignTask" method="post">
-    <div>
-        <label asp-for="EmployeeTask.TaskName"></label>
-        <input asp-for="EmployeeTask.TaskName" class="form-control" />
-        <span asp-validation-for="EmployeeTask.TaskName" class="text-danger"></span>
+    <div class="form-group">
+        <label for="TaskName">Task Name</label>
+        <input asp-for="TaskName" class="form-control" />
+        <span asp-validation-for="TaskName" class="text-danger"></span>
     </div>
-
-    <div>
-        <label asp-for="EmployeeTask.Description"></label>
-        <textarea asp-for="EmployeeTask.Description" class="form-control"></textarea>
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <input asp-for="Description" class="form-control" />
     </div>
-
-    <div>
-        <label asp-for="EmployeeTask.DueDate"></label>
-        <input asp-for="EmployeeTask.DueDate" type="date" class="form-control" />
-        <span asp-validation-for="EmployeeTask.DueDate" class="text-danger"></span>
+    <div class="form-group">
+        <label for="DueDate">Due Date</label>
+        <input asp-for="DueDate" type="date" class="form-control" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
     </div>
-
-    <div>
-        <label for="Employee">Assign To (UserId)</label>
-        <input asp-for="EmployeeTask.AssignedToUserId" class="form-control" />
+    <div class="form-group">
+        <label for="AssignedToUserId">Assign to Employee</label>
+        <select asp-for="AssignedToUserId" class="form-control">
+            <option value="">-- Select Employee --</option>
+            @foreach (var employee in ViewBag.Employees)
+            {
+                <option value="@employee.UserId">@employee.Username</option>
+            }
+        </select>
+        <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
     </div>
-
-
-
-    <button type="submit" class="btn btn-primary mt-3">Assign Task</button>
+    <button type="submit" class="btn btn-primary">Assign Task</button>
 </form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

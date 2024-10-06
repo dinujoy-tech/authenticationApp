@@ -12,12 +12,16 @@ namespace authApp.Models
 
         public string Description { get; set; }
 
+        private DateTime dueDate;
         [Required(ErrorMessage = "Due Date is required.")]
-        public DateTime DueDate { get; set; }
+        public DateTime DueDate
+        {
+            get => dueDate;
+            set => dueDate = DateTime.SpecifyKind(value, DateTimeKind.Utc); // Ensure all dates are stored as UTC.
+        }
 
         [Required(ErrorMessage = "Please select an employee.")]
-        public string AssignedToUserId { get; set; } // This property links the task to the assigned employee
-
-        // Additional properties can be added as needed
+        public string AssignedToUserId { get; set; }
     }
+
 }
