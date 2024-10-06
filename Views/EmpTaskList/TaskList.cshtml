@@ -7,6 +7,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
+           <th>Task Id</th>
             <th>Task Name</th>
             <th>Description</th>
             <th>Due Date</th>
@@ -16,6 +17,7 @@
         @foreach (var task in Model)
         {
             <tr>
+                <td>@task.TaskId</td>
                 <td>@task.TaskName</td>
                 <td>@task.Description</td>
                 <td>@task.DueDate.ToString("yyyy-MM-dd")</td>

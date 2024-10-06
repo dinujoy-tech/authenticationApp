@@ -78,5 +78,33 @@ namespace authApp.Controllers
             return View(tasks);
         }
 
+        
+
+        [HttpGet]
+        public IActionResult UploadTask()
+        {
+            // Get the current user's ID from the session
+            var currentUserId = HttpContext.Session.GetString("UserId");
+
+            // Fetch the tasks assigned to the current user
+            var tasks = _context.EmployeeTasks
+                .Where(t => t.AssignedToUserId == currentUserId)
+                .ToList();
+
+            // Create a new view model instance
+            var model = new UploadTaskViewModel
+            {
+                AssignedTasks = tasks // Assign the tasks to the view model
+            };
+
+            // Pass the view model to the view
+            return View(model);
+        }
+
+
+
+
+
+
     }
 }
