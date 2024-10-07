@@ -10,7 +10,7 @@ namespace authApp.Models
 
         public int TaskId { get; set; } // TaskId to identify which task the employee is uploading for
 
-        [Required]
-        public IFormFile UploadedFile { get; set; } // For uploading the file
+        [Required(ErrorMessage = "File path is required.")]
+        public string FilePath { get; set; } // For entering the file path manually
     }
 }

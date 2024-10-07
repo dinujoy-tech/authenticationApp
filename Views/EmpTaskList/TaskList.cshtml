@@ -1,16 +1,17 @@
-﻿@model IEnumerable<authApp.Models.EmployeeTask>
-@{
-    ViewBag.Title = "Your Tasks";
-}
-<h2>Your Tasks</h2>
+﻿@model List<authApp.Models.EmployeeTask>
 
-<table class="table table-bordered">
+<h2>Tasks List</h2>
+
+<table class="table">
     <thead>
         <tr>
-           <th>Task Id</th>
+            <th>Task ID</th>
             <th>Task Name</th>
             <th>Description</th>
-            <th>Due Date</th>
+            <th>Status</th>
+            <th>Assigned Date</th>
+            <th>Deadline Date</th>
+            <th>Resources</th>
         </tr>
     </thead>
     <tbody>
@@ -20,7 +21,10 @@
                 <td>@task.TaskId</td>
                 <td>@task.TaskName</td>
                 <td>@task.Description</td>
-                <td>@task.DueDate.ToString("yyyy-MM-dd")</td>
+                <td>@task.TaskStatus</td>
+                <td>@task.AssignedDate.ToShortDateString()</td>
+                <td>@task.DeadlineDate.ToShortDateString()</td>
+                <td>@task.Resources</td>
             </tr>
         }
     </tbody>

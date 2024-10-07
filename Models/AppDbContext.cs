@@ -7,7 +7,9 @@ namespace authApp.Models
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; } // Ensure this is correctly defined
-        public DbSet<EmployeeTask> EmployeeTasks { get; set; } // Ensure this line exists
+        public DbSet<EmployeeTask> EmployeeTasks { get; set; }
+        public DbSet<Upload> Uploads { get; set; }
+
 
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
