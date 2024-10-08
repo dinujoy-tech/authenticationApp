@@ -175,7 +175,7 @@ namespace authApp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return RedirectToAction("TaskList"); // Redirect to task list after successful upload
+                return RedirectToAction("UploadTask"); // Redirect to task list after successful upload
             }
 
             // Re-fetch the tasks if the model state is not valid
