@@ -116,6 +116,8 @@ namespace authApp.Controllers
 
             // Pass the model to the view
             return View(model);
+
+            
         }
 
         // POST: Handle the task file upload and save it to the database
