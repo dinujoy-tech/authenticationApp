@@ -20,6 +20,22 @@
         <input asp-for="Role" type="text" />
         <span asp-validation-for="Role" class="text-danger"></span>
     </div>
+
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="ManagerName"></label>
+        <input asp-for="ManagerName" type="text" />
+        <span asp-validation-for="ManagerName" class="text-danger"></span>
+    </div>
     <button type="submit">Login</button>
 </form>
 

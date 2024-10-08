@@ -18,16 +18,33 @@ namespace authApp.Controllers
         }
 
         // GET: View for assigning tasks (only for managers)
-        public IActionResult AssignTask()
+        public async Task<IActionResult> AssignTask()
         {
-            // Fetch list of employees to assign the task to
-            var employees = _context.Users.Where(u => u.Role == "Employee").ToList();
+            // Retrieve the current manager's UserId from the session
+            var currentUserId = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return RedirectToAction("Login", "Account"); // Redirect to login if the session has expired or the user is not logged in
+            }
+
+            // Convert UserId from string to int
+            if (!int.TryParse(currentUserId, out int managerId))
+            {
+                return RedirectToAction("Login", "Account"); // Invalid UserId
+            }
+
+            // Fetch list of employees managed by the current manager
+            var employees = await _context.Users
+                .Where(e => e.ManagerId == managerId)
+                .ToListAsync();
+
             ViewBag.Employees = employees;
             return View();
         }
 
         [HttpPost]
-        public IActionResult AssignTask(EmployeeTask task)
+        public async Task<IActionResult> AssignTask(EmployeeTask task)
         {
             if (ModelState.IsValid)
             {
@@ -37,23 +54,56 @@ namespace authApp.Controllers
 
                 // Add the task to the database
                 _context.EmployeeTasks.Add(task);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 // Clear the form and repopulate the employee list
                 ModelState.Clear();
-                var employeeList = _context.Users.Where(u => u.Role == "Employee").ToList();
+
+                // Retrieve the current manager's UserId from the session
+                var currentUserId = HttpContext.Session.GetString("UserId");
+
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    return RedirectToAction("Login", "Account"); // Redirect to login if the session has expired or the user is not logged in
+                }
+
+                // Convert UserId from string to int
+                if (!int.TryParse(currentUserId, out int managerId))
+                {
+                    return RedirectToAction("Login", "Account"); // Invalid UserId
+                }
+
+                var employeeList = await _context.Users
+                    .Where(e => e.ManagerId == managerId)
+                    .ToListAsync();
+
                 ViewBag.Employees = employeeList;
 
                 return View(new EmployeeTask()); // Clear form on success
             }
 
             // If validation failed, repopulate the employee list
-            var employeeListOnError = _context.Users.Where(u => u.Role == "Employee").ToList();
+            var currentUserIdOnError = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(currentUserIdOnError))
+            {
+                return RedirectToAction("Login", "Account"); // Redirect to login if the session has expired or the user is not logged in
+            }
+
+            // Convert UserId from string to int
+            if (!int.TryParse(currentUserIdOnError, out int managerIdOnError))
+            {
+                return RedirectToAction("Login", "Account"); // Invalid UserId
+            }
+
+            var employeeListOnError = await _context.Users
+                .Where(e => e.ManagerId == managerIdOnError)
+                .ToListAsync();
+
             ViewBag.Employees = employeeListOnError;
 
             return View(task); // Return the form with validation errors and filled data
         }
-
 
         public IActionResult TaskList()
         {
@@ -116,8 +166,6 @@ namespace authApp.Controllers
 
             // Pass the model to the view
             return View(model);
-
-            
         }
 
         // POST: Handle the task file upload and save it to the database
@@ -189,7 +237,5 @@ namespace authApp.Controllers
             // If the model is not valid, return the view with validation errors
             return View(model);
         }
-
-
     }
 }

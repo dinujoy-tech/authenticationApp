@@ -38,25 +38,41 @@
 
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace authApp.Models
 {
     public class User
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
 
-        [Required(ErrorMessage = "Username is required.")]
+        [Required]
+        [StringLength(100)]
         public string Username { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
+        [Required]
+        [StringLength(256)]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "Role is required.")]
-        public string Role { get; set; } // New property to define user role
+        [Required]
+        [EmailAddress]
+        [StringLength(256)]
+        public string Email { get; set; }
 
-        // Additional properties (e.g., Email, FullName) can be added here.
-        //public string Email { get; set; } // Optional Email property
-        //public string FullName { get; set; } // Optional FullName property
+        [StringLength(150)]
+        public string FullName { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string Role { get; set; }
+
+        [StringLength(150)]
+        public string ManagerName { get; set; }
+        public int? ManagerId { get; set; }
+
+        public DateTime DateOfJoining { get; set; }
     }
 }
 
