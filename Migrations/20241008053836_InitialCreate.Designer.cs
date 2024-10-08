@@ -12,7 +12,7 @@ using authApp.Models;
 namespace authApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241004193151_InitialCreate")]
+    [Migration("20241008053836_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,24 +33,64 @@ namespace authApp.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TaskId"));
 
-                    b.Property<string>("AssignedToUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("AssignedToUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DeadlineDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Resources")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("TaskName")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TaskStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("TaskId");
 
                     b.ToTable("EmployeeTasks");
+                });
+
+            modelBuilder.Entity("authApp.Models.Upload", b =>
+                {
+                    b.Property<int>("UploadId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UploadId"));
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UploadId");
+
+                    b.ToTable("Uploads");
                 });
 
             modelBuilder.Entity("authApp.Models.User", b =>

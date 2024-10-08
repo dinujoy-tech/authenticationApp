@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace authApp.Controllers
 {
@@ -79,45 +80,9 @@ namespace authApp.Controllers
             return View(tasks);
         }
 
-        // GET: Display task list and upload form
+        // GET: Display tasks assigned to the current user for file upload
         [HttpGet]
         public IActionResult UploadTask()
-        {
-            // Retrieve the current user's UserId from the session
-            var currentUserId = HttpContext.Session.GetString("UserId");
-
-            // If the user is not logged in, redirect to login
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                return RedirectToAction("Login", "Account"); // Redirect to login if the session is expired
-            }
-
-            // Attempt to parse UserId (from session) to an integer
-            if (!int.TryParse(currentUserId, out int userIdInt))
-            {
-                return RedirectToAction("Login", "Account"); // If UserId is not a valid integer, redirect to login
-            }
-
-            // Fetch tasks assigned to the current user
-            var tasks = _context.EmployeeTasks
-                .Where(t => t.AssignedToUserId == userIdInt)
-                .ToList();
-
-            // Create the view model
-            var model = new UploadTaskViewModel
-            {
-                AssignedTasks = tasks,
-                TaskId = 0, // Default to no specific task selected
-                FilePath = string.Empty // Initialize empty string for file path
-            };
-
-            // Pass the model to the view
-            return View(model);
-        }
-
-        // POST: Handle the task file upload and update task status
-        [HttpPost]
-        public async Task<IActionResult> UploadTask(UploadTaskViewModel model)
         {
             // Retrieve the current user's UserId from the session
             var currentUserId = HttpContext.Session.GetString("UserId");
@@ -134,8 +99,46 @@ namespace authApp.Controllers
                 return RedirectToAction("Login", "Account"); // If UserId is not a valid integer, redirect to login
             }
 
-            // Attempt to parse TaskId (from model) to an integer
-            if (!int.TryParse(model.TaskId.ToString(), out int taskId))
+            // Fetch tasks assigned to the current user
+            var tasks = _context.EmployeeTasks
+                .Where(t => t.AssignedToUserId == userIdInt)
+                .ToList();
+
+            // Create an Upload instance to pass to the view
+            var model = new Upload
+            {
+                TaskId = 0, // Default to no specific task selected
+                FilePath = string.Empty // Initialize an empty string for the file path
+            };
+
+            // Pass the tasks list as ViewBag
+            ViewBag.AssignedTasks = tasks;
+
+            // Pass the model to the view
+            return View(model);
+        }
+
+        // POST: Handle the task file upload and save it to the database
+        [HttpPost]
+        public async Task<IActionResult> UploadTask(Upload model)
+        {
+            // Retrieve the current user's UserId from the session
+            var currentUserId = HttpContext.Session.GetString("UserId");
+
+            // If the user is not logged in, redirect to login
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Attempt to parse UserId (from session) to an integer
+            if (!int.TryParse(currentUserId, out int userIdInt))
+            {
+                return RedirectToAction("Login", "Account"); // If UserId is not a valid integer, redirect to login
+            }
+
+            // Validate the TaskId
+            if (model.TaskId <= 0)
             {
                 ModelState.AddModelError("TaskId", "Invalid Task ID.");
             }
@@ -143,31 +146,26 @@ namespace authApp.Controllers
             // If the model state is valid, proceed with file upload
             if (ModelState.IsValid)
             {
-                // Create a new Upload instance with the manually entered file path
-                var upload = new Upload
-                {
-                    TaskId = taskId,
-                    UserId = userIdInt,
-                    FilePath = model.FilePath, // Manually entered file path
-                    UploadedAt = DateTime.UtcNow
-                };
+                // Set missing fields
+                model.UserId = userIdInt;          // UserId from session
+                model.UploadedAt = DateTime.UtcNow; // Automatically set the upload time to current UTC time
 
                 // Add the upload record to the database
-                _context.Uploads.Add(upload);
+                _context.Uploads.Add(model);
                 await _context.SaveChangesAsync();
 
-                // Check if the uploaded file is past the task's deadline
-                var task = await _context.EmployeeTasks.FindAsync(taskId);
+                // Fetch the task to update its status
+                var task = await _context.EmployeeTasks.FindAsync(model.TaskId);
                 if (task != null)
                 {
                     // Update task status based on whether the file was uploaded before or after the deadline
-                    if (upload.UploadedAt > task.DeadlineDate)
+                    if (model.UploadedAt > task.DeadlineDate)
                     {
-                        task.TaskStatus = "Overdue";  // Mark as overdue if past deadline
+                        task.TaskStatus = "Overdue";  // Mark as overdue if past the deadline
                     }
                     else
                     {
-                        task.TaskStatus = "Submitted";  // Mark as submitted if before deadline
+                        task.TaskStatus = "Submitted";  // Mark as submitted if before the deadline
                     }
 
                     // Update the task status in the database
@@ -183,13 +181,13 @@ namespace authApp.Controllers
                 .Where(t => t.AssignedToUserId == userIdInt)
                 .ToList();
 
-            model.AssignedTasks = tasks; // Reassign the tasks to the model
+            // Pass the tasks list as ViewBag again
+            ViewBag.AssignedTasks = tasks;
 
-            // If model is not valid, return the view with validation errors
+            // If the model is not valid, return the view with validation errors
             return View(model);
         }
 
-        
 
     }
 }

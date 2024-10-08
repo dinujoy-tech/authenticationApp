@@ -21,11 +21,6 @@ namespace authApp.Models
         [Required]
         public DateTime UploadedAt { get; set; }  // When the file was uploaded
 
-        // Relationships
-        [ForeignKey("TaskId")]
-        public EmployeeTask Task { get; set; }  // Navigation property for EmployeeTask
-
-        [ForeignKey("UserId")]
-        public User UploadedBy { get; set; }  // Navigation property for User
+  
     }
 }

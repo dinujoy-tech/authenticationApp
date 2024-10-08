@@ -18,14 +18,34 @@ namespace authApp.Migrations
                 {
                     TaskId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
                     TaskName = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    AssignedToUserId = table.Column<string>(type: "text", nullable: false)
+                    TaskStatus = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    AssignedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeadlineDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Resources = table.Column<string>(type: "text", nullable: false),
+                    AssignedToUserId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmployeeTasks", x => x.TaskId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Uploads",
+                columns: table => new
+                {
+                    UploadId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TaskId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    FilePath = table.Column<string>(type: "text", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Uploads", x => x.UploadId);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,6 +69,9 @@ namespace authApp.Migrations
         {
             migrationBuilder.DropTable(
                 name: "EmployeeTasks");
+
+            migrationBuilder.DropTable(
+                name: "Uploads");
 
             migrationBuilder.DropTable(
                 name: "Users");
